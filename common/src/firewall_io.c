@@ -24,6 +24,7 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
     config.input_policy = DEFAULT_POLICY;
     config.output_policy = DEFAULT_POLICY;
     config.default_logging = DEFAULT_LOGGING;
+    config.logfile_rotate = DEFAULT_LOGFILE_ROTATE;
 
     char line[CONFIG_MAX_LEN];
     while (fgets(line, sizeof(line), fp) != NULL) {
@@ -63,6 +64,16 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
                     goto cleanup;
                 }
                 config.default_logging = default_logging;
+                break;
+            case CONFIG_LOGFILE_ROTATE:
+                char *endptr;
+                long rotate_value = strtol(value, &endptr, 10);
+                if (*endptr != '\0') {
+                    goto cleanup;
+                } else if (rotate_value < 0) {
+                    goto cleanup;
+                }
+                config.logfile_rotate = (size_t)rotate_value;
                 break;
             case CONFIG_UNKNOWN:
                 goto cleanup;

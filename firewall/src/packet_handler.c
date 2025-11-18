@@ -18,12 +18,14 @@ int handle_input_packet(
 )
 {
     PacketHandlerArgs *args = (PacketHandlerArgs *)data;
+    FirewallConfig *config = args->config;
     pthread_rwlock_t *rwlock = args->rwlock;
     StateTableEntry **head = args->head;
     FirewallRule *rules = NULL;
     size_t rule_count = 0;
-    ActionType policy = *(args->policy);
-    LogStatus log_flag = *(args->default_logging);
+    ActionType policy = config->input_policy;
+    LogStatus log_flag = config->default_logging;
+    size_t logfile_rotate = config->logfile_rotate;
     FILE **log_fp = args->log_fp;
     FirewallRule *match_rule = NULL;
 
@@ -49,7 +51,7 @@ int handle_input_packet(
     // ルールが存在しないことが判明した時点でパケットをポリシーに従い処理する
     if ((rules == NULL || rule_count == 0) && *head == NULL) {
         if (log_flag == LOG_ENABLED) {
-            log_packet(log_fp, packet, CHAIN_INPUT, match_rule, policy);
+            log_packet(log_fp, packet, CHAIN_INPUT, match_rule, policy, logfile_rotate);
         }
         if (policy == ACTION_ACCEPT) {
             return nfq_set_verdict(qh, packet_id, NF_ACCEPT, 0, NULL);
@@ -92,7 +94,7 @@ int handle_input_packet(
     }
 
     if (log_flag == LOG_ENABLED) {
-        log_packet(log_fp, packet, CHAIN_INPUT, match_rule, policy);
+        log_packet(log_fp, packet, CHAIN_INPUT, match_rule, policy, logfile_rotate);
     }
 
     switch (packet_result) {
@@ -116,12 +118,14 @@ int handle_output_packet(
 )
 {
     PacketHandlerArgs *args = (PacketHandlerArgs *)data;
+    FirewallConfig *config = args->config;
     pthread_rwlock_t *rwlock = args->rwlock;
     StateTableEntry **head = args->head;
     FirewallRule *rules = NULL;
     size_t rule_count = 0;
-    ActionType policy = *(args->policy);
-    LogStatus log_flag = *(args->default_logging);
+    ActionType policy = config->output_policy;
+    LogStatus log_flag = config->default_logging;
+    size_t logfile_rotate = config->logfile_rotate;
     FILE **log_fp = args->log_fp;
     FirewallRule *match_rule = NULL;
 
@@ -147,7 +151,7 @@ int handle_output_packet(
     // ルールが存在しないことが判明した時点でパケットをポリシーに従い処理する
     if ((rules == NULL || rule_count == 0) && *head == NULL) {
         if (log_flag == LOG_ENABLED) {
-            log_packet(log_fp, packet, CHAIN_OUTPUT, match_rule, policy);
+            log_packet(log_fp, packet, CHAIN_OUTPUT, match_rule, policy, logfile_rotate);
         }
         if (policy == ACTION_ACCEPT) {
             if (is_state_tracking_required(packet) == true) {
@@ -195,7 +199,7 @@ int handle_output_packet(
     }
 
     if (log_flag == LOG_ENABLED) {
-        log_packet(log_fp, packet, CHAIN_OUTPUT, match_rule, policy);
+        log_packet(log_fp, packet, CHAIN_OUTPUT, match_rule, policy, logfile_rotate);
     }
 
     switch (packet_result) {

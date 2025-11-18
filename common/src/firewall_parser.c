@@ -87,6 +87,11 @@ bool config_to_string(ConfigType config, char *str_out, size_t str_len)
         return true;
     }
 
+    if (config == CONFIG_LOGFILE_ROTATE) {
+        snprintf(str_out, str_len, "LOGFILE_ROTATE");
+        return true;
+    }
+
     return false;
 }
 
@@ -228,6 +233,10 @@ ConfigType parse_config_string(const char *config_string)
 
     if (strcmp(config_string, "DEFAULT_LOGGING") == 0) {
         return CONFIG_DEFAULT_LOGGING;
+    }
+
+    if (strcmp(config_string, "LOGFILE_ROTATE") == 0) {
+        return CONFIG_LOGFILE_ROTATE;
     }
 
     return CONFIG_UNKNOWN;

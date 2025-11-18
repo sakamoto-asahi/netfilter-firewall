@@ -90,18 +90,16 @@ int main(void)
         &head,
         &fw_input_rules,
         &fw_rule_counts.input_count,
-        &config.input_policy,
-        &config.default_logging,
         &log_fp,
+        &config
     };
     PacketHandlerArgs output_args = {
         rwlock,
         &head,
         &fw_output_rules,
         &fw_rule_counts.output_count,
-        &config.output_policy,
-        &config.default_logging,
         &log_fp,
+        &config
     };
     // INPUTチェインのパケットを受信するハンドルの作成
     for (int i = MIN_INPUT_QUEUE_NUMBER; i <= MAX_INPUT_QUEUE_NUMBER; i++) {

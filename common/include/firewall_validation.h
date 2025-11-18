@@ -30,6 +30,5 @@ bool is_valid_ip(const char *ip_str);
 bool is_valid_port(const char *port_str);
 RuleValidationResult is_valid_rule_string(const char *rule_str);
 FileValidationResult is_valid_rule_file(FILE *fp);
-FileValidationResult is_valid_config_file(FILE *fp);
 
 #endif

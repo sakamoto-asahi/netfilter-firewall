@@ -15,7 +15,6 @@
 #define DOMAIN_SOCKET_PATH "/var/run/netfilter_firewall/firewall.sock"
 #define LOG_FILE_MAX_LEN 256
 #define LOG_ROTATION_SIZE_MB 10
-#define LOGFILE_ROTATE 3
 #define CHAIN_MAX_LEN 8
 #define PROTOCOL_MAX_LEN 8
 #define IP_ADDR_MAX_LEN INET_ADDRSTRLEN
@@ -31,6 +30,7 @@ typedef enum {
     CONFIG_INPUT_POLICY,
     CONFIG_OUTPUT_POLICY,
     CONFIG_DEFAULT_LOGGING,
+    CONFIG_LOGFILE_ROTATE,
     CONFIG_UNKNOWN
 } ConfigType;
 
@@ -94,21 +94,25 @@ typedef struct {
     ActionType input_policy;
     ActionType output_policy;
     LogStatus default_logging;
+    size_t logfile_rotate;
 } FirewallConfig;
 
-// ルールの未設定の値
-#define IP_ADDR_UNSPECIFIED ""
-#define PORT_UNSPECIFIED INT_MIN
-#define ORIGINAL_UNSPECIFIED ""
-
-// ルールのデフォルト値
+// 設定のデフォルト値
 extern const ActionType DEFAULT_POLICY;
 extern const LogStatus DEFAULT_LOGGING; // ルールに一致しなかったパケットのログ設定
+#define DEFAULT_LOGFILE_ROTATE 3
+
+// ルールのデフォルト値
 extern const ProtocolType DEFAULT_PROTOCOL;
 extern const char *DEFAULT_IP_ADDR;
 extern const int DEFAULT_PORT;
 extern const ActionType DEFAULT_ACTION;
 extern const LogStatus DEFAULT_LOG_STATUS; // ルールに設定するデフォルトのログ
 extern const RuleState DEFAULT_RULE_STATE;
+
+// ルールの未設定の値
+#define IP_ADDR_UNSPECIFIED ""
+#define PORT_UNSPECIFIED INT_MIN
+#define ORIGINAL_UNSPECIFIED ""
 
 #endif
