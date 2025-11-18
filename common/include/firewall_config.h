@@ -14,7 +14,6 @@
 #define LOG_FILE "log/packet.log"
 #define DOMAIN_SOCKET_PATH "/var/run/netfilter_firewall/firewall.sock"
 #define LOG_FILE_MAX_LEN 256
-#define LOG_ROTATION_SIZE_MB 10
 #define CHAIN_MAX_LEN 8
 #define PROTOCOL_MAX_LEN 8
 #define IP_ADDR_MAX_LEN INET_ADDRSTRLEN
@@ -31,6 +30,7 @@ typedef enum {
     CONFIG_OUTPUT_POLICY,
     CONFIG_DEFAULT_LOGGING,
     CONFIG_LOGFILE_ROTATE,
+    CONFIG_LOG_ROTATION_SIZE,
     CONFIG_UNKNOWN
 } ConfigType;
 
@@ -95,12 +95,14 @@ typedef struct {
     ActionType output_policy;
     LogStatus default_logging;
     size_t logfile_rotate;
+    size_t log_rotation_size;
 } FirewallConfig;
 
 // 設定のデフォルト値
 extern const ActionType DEFAULT_POLICY;
 extern const LogStatus DEFAULT_LOGGING; // ルールに一致しなかったパケットのログ設定
 #define DEFAULT_LOGFILE_ROTATE 3
+#define DEFAULT_LOG_ROTATION_SIZE_MB 10
 
 // ルールのデフォルト値
 extern const ProtocolType DEFAULT_PROTOCOL;

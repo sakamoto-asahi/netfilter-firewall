@@ -10,7 +10,8 @@ void log_packet(
     ChainType chain_type,
     FirewallRule *match_rule,
     ActionType policy,
-    size_t logfile_rotate
+    size_t logfile_rotate,
+    size_t log_rotation_size
 );
 
 #endif

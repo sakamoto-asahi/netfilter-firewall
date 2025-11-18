@@ -25,6 +25,7 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
     config.output_policy = DEFAULT_POLICY;
     config.default_logging = DEFAULT_LOGGING;
     config.logfile_rotate = DEFAULT_LOGFILE_ROTATE;
+    config.log_rotation_size = DEFAULT_LOG_ROTATION_SIZE_MB;
 
     char line[CONFIG_MAX_LEN];
     while (fgets(line, sizeof(line), fp) != NULL) {
@@ -42,6 +43,7 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
             goto cleanup;
         }
 
+        char *endptr;
         ConfigType config_type = parse_config_string(key);
         switch (config_type) {
             case CONFIG_INPUT_POLICY:
@@ -66,7 +68,6 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
                 config.default_logging = default_logging;
                 break;
             case CONFIG_LOGFILE_ROTATE:
-                char *endptr;
                 long rotate_value = strtol(value, &endptr, 10);
                 if (*endptr != '\0') {
                     goto cleanup;
@@ -74,6 +75,15 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
                     goto cleanup;
                 }
                 config.logfile_rotate = (size_t)rotate_value;
+                break;
+            case CONFIG_LOG_ROTATION_SIZE:
+                long rotation_size_value = strtol(value, &endptr, 10);
+                if (*endptr != '\0') {
+                    goto cleanup;
+                } else if (rotation_size_value <= 0) {
+                    goto cleanup;
+                }
+                config.log_rotation_size = (size_t)rotation_size_value;
                 break;
             case CONFIG_UNKNOWN:
                 goto cleanup;
