@@ -97,6 +97,21 @@ bool config_to_string(ConfigType config, char *str_out, size_t str_len)
         return true;
     }
 
+    if (config == CONFIG_ICMP_TIMEOUT_SEC) {
+        snprintf(str_out, str_len, "ICMP_CONNECTION_TIMEOUT_SEC");
+        return true;
+    }
+
+    if (config == CONFIG_TCP_TIMEOUT_SEC) {
+        snprintf(str_out, str_len, "TCP_CONNECTION_TIMEOUT_SEC");
+        return true;
+    }
+
+    if (config == CONFIG_UDP_TIMEOUT_SEC) {
+        snprintf(str_out, str_len, "UDP_CONNECTION_TIMEOUT_SEC");
+        return true;
+    }
+
     return false;
 }
 
@@ -259,6 +274,18 @@ ConfigType parse_config_string(const char *config_string)
 
     if (strcmp(config_string, "LOG_ROTATION_SIZE_MB") == 0) {
         return CONFIG_LOG_ROTATION_SIZE;
+    }
+
+    if (strcmp(config_string, "ICMP_CONNECTION_TIMEOUT_SEC") == 0) {
+        return CONFIG_ICMP_TIMEOUT_SEC;
+    }
+
+    if (strcmp(config_string, "TCP_CONNECTION_TIMEOUT_SEC") == 0) {
+        return CONFIG_TCP_TIMEOUT_SEC;
+    }
+
+    if (strcmp(config_string, "UDP_CONNECTION_TIMEOUT_SEC") == 0) {
+        return CONFIG_UDP_TIMEOUT_SEC;
     }
 
     return CONFIG_UNKNOWN;

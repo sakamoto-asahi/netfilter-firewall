@@ -132,7 +132,8 @@ int main(void)
     };
     StateTableCleanerArgs state_table_cleaner_args= {
         rwlock,
-        &head
+        &head,
+        &(config.state_timeouts)
     };
     CmdListenerArgs cmd_listener_args = {
         rwlock,

@@ -43,6 +43,7 @@ void *state_table_cleaner_thread(void *arg)
     StateTableCleanerArgs *args = (StateTableCleanerArgs *)arg;
     pthread_rwlock_t *rwlock = args->rwlock;
     StateTableEntry **head = args->head;
+    StateTimeouts *state_timeouts = args->state_timeouts;
 
     while (1) {
         for (int i = 0; i < STATE_TABLE_CLEANER_INTERVAL_SEC; i++) {
@@ -52,7 +53,7 @@ void *state_table_cleaner_thread(void *arg)
             sleep(1);
         }
         pthread_rwlock_wrlock(rwlock);
-        cleanup_expired_entries(head);
+        cleanup_expired_entries(head, *state_timeouts);
         pthread_rwlock_unlock(rwlock);
     }
 }

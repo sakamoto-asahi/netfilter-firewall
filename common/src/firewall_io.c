@@ -26,6 +26,9 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
     config.default_logging = DEFAULT_LOGGING;
     config.logfile_rotate = DEFAULT_LOGFILE_ROTATE;
     config.log_rotation_size = DEFAULT_LOG_ROTATION_SIZE_MB;
+    config.state_timeouts.icmp_timeout_sec = DEFAULT_ICMP_CONNECTION_TIMEOUT_SEC;
+    config.state_timeouts.tcp_timeout_sec = DEFAULT_TCP_CONNECTION_TIMEOUT_SEC;
+    config.state_timeouts.udp_timeout_sec = DEFAULT_UDP_CONNECTION_TIMEOUT_SEC;
 
     char line[CONFIG_MAX_LEN];
     while (fgets(line, sizeof(line), fp) != NULL) {
@@ -43,7 +46,6 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
             goto cleanup;
         }
 
-        char *endptr;
         ConfigType config_type = parse_config_string(key);
         switch (config_type) {
             case CONFIG_INPUT_POLICY:
@@ -68,22 +70,39 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
                 config.default_logging = default_logging;
                 break;
             case CONFIG_LOGFILE_ROTATE:
-                long rotate_value = strtol(value, &endptr, 10);
-                if (*endptr != '\0') {
-                    goto cleanup;
-                } else if (rotate_value < 0) {
+                int rotate_value = parse_config_number(value, 0);
+                if (rotate_value < 0) {
                     goto cleanup;
                 }
                 config.logfile_rotate = (size_t)rotate_value;
                 break;
             case CONFIG_LOG_ROTATION_SIZE:
-                long rotation_size_value = strtol(value, &endptr, 10);
-                if (*endptr != '\0') {
-                    goto cleanup;
-                } else if (rotation_size_value <= 0) {
+                int rotation_size_value = parse_config_number(value, 1);
+                if (rotation_size_value < 1) {
                     goto cleanup;
                 }
                 config.log_rotation_size = (size_t)rotation_size_value;
+                break;
+            case CONFIG_ICMP_TIMEOUT_SEC:
+                int icmp_timeout_value = parse_config_number(value, 0);
+                if (icmp_timeout_value < 0) {
+                    goto cleanup;
+                }
+                config.state_timeouts.icmp_timeout_sec = (size_t)icmp_timeout_value;
+                break;
+            case CONFIG_TCP_TIMEOUT_SEC:
+                int tcp_timeout_value = parse_config_number(value, 0);
+                if (tcp_timeout_value < 0) {
+                    goto cleanup;
+                }
+                config.state_timeouts.tcp_timeout_sec = (size_t)tcp_timeout_value;
+                break;
+            case CONFIG_UDP_TIMEOUT_SEC:
+                int udp_timeout_value = parse_config_number(value, 0);
+                if (udp_timeout_value < 0) {
+                    goto cleanup;
+                }
+                config.state_timeouts.udp_timeout_sec = (size_t)udp_timeout_value;
                 break;
             case CONFIG_UNKNOWN:
                 goto cleanup;

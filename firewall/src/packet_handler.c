@@ -27,6 +27,7 @@ int handle_input_packet(
     LogStatus log_flag = config->default_logging;
     size_t logfile_rotate = config->logfile_rotate;
     size_t log_rotation_size = config->log_rotation_size;
+    StateTimeouts state_timeouts = config->state_timeouts;
     FILE **log_fp = args->log_fp;
     FirewallRule *match_rule = NULL;
 
@@ -68,7 +69,7 @@ int handle_input_packet(
     StateTableEntry *match_entry = lookup_state_table(*head, packet);
     if (match_entry != NULL) {
         StateUpdateResult update_result =
-            track_connection_state(head, match_entry, packet);
+            track_connection_state(head, match_entry, packet, state_timeouts);
         switch (update_result) {
             case STATE_UPDATED:
                 packet_result = PACKET_ACCEPT;
@@ -130,6 +131,7 @@ int handle_output_packet(
     LogStatus log_flag = config->default_logging;
     size_t logfile_rotate = config->logfile_rotate;
     size_t log_rotation_size = config->log_rotation_size;
+    StateTimeouts state_timeouts = config->state_timeouts;
     FILE **log_fp = args->log_fp;
     FirewallRule *match_rule = NULL;
 
@@ -176,7 +178,7 @@ int handle_output_packet(
     StateTableEntry *match_entry = lookup_state_table(*head, packet);
     if (match_entry != NULL) {
         StateUpdateResult update_result =
-            track_connection_state(head, match_entry, packet);
+            track_connection_state(head, match_entry, packet, state_timeouts);
         switch (update_result) {
             case STATE_UPDATED:
                 packet_result = PACKET_ACCEPT;

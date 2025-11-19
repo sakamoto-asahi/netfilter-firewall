@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <netinet/ip.h>
+#include "stateful_inspection.h"
 
 #define FIREWALL_CONFIG_DIR "config/"
 #define LOG_DIR "log/"
@@ -31,6 +32,9 @@ typedef enum {
     CONFIG_DEFAULT_LOGGING,
     CONFIG_LOGFILE_ROTATE,
     CONFIG_LOG_ROTATION_SIZE,
+    CONFIG_ICMP_TIMEOUT_SEC,
+    CONFIG_TCP_TIMEOUT_SEC,
+    CONFIG_UDP_TIMEOUT_SEC,
     CONFIG_UNKNOWN
 } ConfigType;
 
@@ -96,6 +100,7 @@ typedef struct {
     LogStatus default_logging;
     size_t logfile_rotate;
     size_t log_rotation_size;
+    StateTimeouts state_timeouts;
 } FirewallConfig;
 
 // 設定のデフォルト値
@@ -103,6 +108,9 @@ extern const ActionType DEFAULT_POLICY;
 extern const LogStatus DEFAULT_LOGGING; // ルールに一致しなかったパケットのログ設定
 #define DEFAULT_LOGFILE_ROTATE 3
 #define DEFAULT_LOG_ROTATION_SIZE_MB 10
+#define DEFAULT_ICMP_CONNECTION_TIMEOUT_SEC 10
+#define DEFAULT_TCP_CONNECTION_TIMEOUT_SEC 300
+#define DEFAULT_UDP_CONNECTION_TIMEOUT_SEC 60
 
 // ルールのデフォルト値
 extern const ProtocolType DEFAULT_PROTOCOL;
