@@ -14,6 +14,7 @@ bool rule_port_to_string(int port, char *str_out, size_t str_len);
 bool rule_action_to_string(ActionType action, char *str_out, size_t str_len);
 bool rule_log_to_string(LogStatus log, char *str_out, size_t str_len);
 bool rule_state_to_string(RuleState state, char *str_out, size_t str_len);
+int parse_config_number(const char *config_number, int min_num);
 ConfigType parse_config_string(const char *config_string);
 ChainType parse_chain_string(const char *chain_str);
 ProtocolType parse_protocol_string(const char *proto_str);

@@ -221,6 +221,19 @@ bool rule_state_to_string(RuleState state, char *str_out, size_t str_len)
     return false;
 }
 
+int parse_config_number(const char *config_number, int min_num)
+{
+    char *endptr;
+    long ret = strtol(config_number, &endptr, 10);
+    if (*endptr != '\0') {
+        return min_num - 1;
+    } else if (ret < min_num || ret > INT_MAX) {
+        return min_num - 1;
+    }
+
+    return ret;
+}
+
 ConfigType parse_config_string(const char *config_string)
 {
     if (config_string == NULL) {
