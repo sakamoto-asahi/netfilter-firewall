@@ -17,6 +17,7 @@ typedef struct {
     pthread_rwlock_t *rwlock;
     StateTableEntry **head;
     StateTimeouts *state_timeouts;
+    size_t *clean_interval;
 } StateTableCleanerArgs;
 
 typedef struct {

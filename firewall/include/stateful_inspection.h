@@ -5,8 +5,6 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define STATE_TABLE_CLEANER_INTERVAL_SEC 30
-
 typedef struct {
     size_t icmp_timeout_sec;
     size_t tcp_timeout_sec;

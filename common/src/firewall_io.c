@@ -29,6 +29,7 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
     config.state_timeouts.icmp_timeout_sec = DEFAULT_ICMP_CONNECTION_TIMEOUT_SEC;
     config.state_timeouts.tcp_timeout_sec = DEFAULT_TCP_CONNECTION_TIMEOUT_SEC;
     config.state_timeouts.udp_timeout_sec = DEFAULT_UDP_CONNECTION_TIMEOUT_SEC;
+    config.state_table_clean_interval = DEFAULT_STATE_TABLE_CLEAN_INTERVAL_SEC;
 
     char line[CONFIG_MAX_LEN];
     while (fgets(line, sizeof(line), fp) != NULL) {
@@ -103,6 +104,13 @@ bool load_config_from_file(FILE *fp, FirewallConfig *config_out)
                     goto cleanup;
                 }
                 config.state_timeouts.udp_timeout_sec = (size_t)udp_timeout_value;
+                break;
+            case CONFIG_STATE_TABLE_CLEAN_INTERVAL:
+                int clean_interval_value = parse_config_number(value, 1);
+                if (clean_interval_value < 1) {
+                    goto cleanup;
+                }
+                config.state_table_clean_interval = (size_t)clean_interval_value;
                 break;
             case CONFIG_UNKNOWN:
                 goto cleanup;

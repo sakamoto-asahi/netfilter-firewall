@@ -112,6 +112,11 @@ bool config_to_string(ConfigType config, char *str_out, size_t str_len)
         return true;
     }
 
+    if (config == CONFIG_STATE_TABLE_CLEAN_INTERVAL) {
+        snprintf(str_out, str_len, "STATE_TABLE_CLEAN_INTERVAL_SEC");
+        return true;
+    }
+
     return false;
 }
 
@@ -286,6 +291,10 @@ ConfigType parse_config_string(const char *config_string)
 
     if (strcmp(config_string, "UDP_CONNECTION_TIMEOUT_SEC") == 0) {
         return CONFIG_UDP_TIMEOUT_SEC;
+    }
+
+    if (strcmp(config_string, "STATE_TABLE_CLEAN_INTERVAL_SEC") == 0) {
+        return CONFIG_STATE_TABLE_CLEAN_INTERVAL;
     }
 
     return CONFIG_UNKNOWN;

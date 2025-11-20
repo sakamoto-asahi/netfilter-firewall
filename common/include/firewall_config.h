@@ -35,6 +35,7 @@ typedef enum {
     CONFIG_ICMP_TIMEOUT_SEC,
     CONFIG_TCP_TIMEOUT_SEC,
     CONFIG_UDP_TIMEOUT_SEC,
+    CONFIG_STATE_TABLE_CLEAN_INTERVAL,
     CONFIG_UNKNOWN
 } ConfigType;
 
@@ -101,6 +102,7 @@ typedef struct {
     size_t logfile_rotate;
     size_t log_rotation_size;
     StateTimeouts state_timeouts;
+    size_t state_table_clean_interval;
 } FirewallConfig;
 
 // 設定のデフォルト値
@@ -111,6 +113,7 @@ extern const LogStatus DEFAULT_LOGGING; // ルールに一致しなかったパ�
 #define DEFAULT_ICMP_CONNECTION_TIMEOUT_SEC 10
 #define DEFAULT_TCP_CONNECTION_TIMEOUT_SEC 300
 #define DEFAULT_UDP_CONNECTION_TIMEOUT_SEC 60
+#define DEFAULT_STATE_TABLE_CLEAN_INTERVAL_SEC 30
 
 // ルールのデフォルト値
 extern const ProtocolType DEFAULT_PROTOCOL;
