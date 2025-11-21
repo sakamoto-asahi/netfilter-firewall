@@ -12,17 +12,20 @@
 
 ProtocolType get_protocol_from_number(uint8_t proto_num)
 {
-    if (proto_num == 1) {
-        return PROTO_ICMP;
+    switch (proto_num) {
+        case 1:
+            return PROTO_ICMP;
+            break; // NOT REACHED
+        case 6:
+            return PROTO_TCP;
+            break; // NOT REACHED
+        case 17:
+            return PROTO_UDP;
+            break; // NOT REACHED
+        default:
+            return PROTO_UNSPECIFIED;
+            break; // NOT REACHED
     }
-    if (proto_num == 6) {
-        return PROTO_TCP;
-    }
-    if (proto_num == 17) {
-        return PROTO_UDP;
-    }
-
-    return PROTO_UNSPECIFIED;
 }
 
 bool get_packet_ports(const unsigned char *packet, int *src_port, int *dst_port)
@@ -36,30 +39,34 @@ bool get_packet_ports(const unsigned char *packet, int *src_port, int *dst_port)
     size_t ip_hdr_len = ip_hdr->ihl * 4;
     int protocol = ip_hdr->protocol;
 
-    if (protocol == IPPROTO_TCP) {
-        struct tcphdr *tcp_hdr = (struct tcphdr *)(packet + ip_hdr_len);
-        if (src_port != NULL) {
-            *src_port = ntohs(tcp_hdr->th_sport);
-        }
-        if (dst_port != NULL) {
-            *dst_port = ntohs(tcp_hdr->th_dport);
-        }
-    } else if (protocol == IPPROTO_UDP) {
-        struct udphdr *udp_hdr = (struct udphdr *)(packet + ip_hdr_len);
-        if (src_port != NULL) {
-            *src_port = ntohs(udp_hdr->uh_sport);
-        }
-        if (dst_port != NULL) {
-            *dst_port = ntohs(udp_hdr->uh_dport);
-        }
-    } else {
-        // ポート番号が存在しないプロトコルのパケットには、-1（全て許可）を設定する
-        if (src_port != NULL) {
-            *src_port = -1;
-        }
-        if (dst_port != NULL) {
-            *dst_port = -1;
-        }
+    switch (protocol) {
+        case IPPROTO_TCP:
+            struct tcphdr *tcp_hdr = (struct tcphdr *)(packet + ip_hdr_len);
+            if (src_port != NULL) {
+                *src_port = ntohs(tcp_hdr->th_sport);
+            }
+            if (dst_port != NULL) {
+                *dst_port = ntohs(tcp_hdr->th_dport);
+            }
+            break;
+        case IPPROTO_UDP:
+            struct udphdr *udp_hdr = (struct udphdr *)(packet + ip_hdr_len);
+            if (src_port != NULL) {
+                *src_port = ntohs(udp_hdr->uh_sport);
+            }
+            if (dst_port != NULL) {
+                *dst_port = ntohs(udp_hdr->uh_dport);
+            }
+            break;
+        default:
+            // ポート番号が存在しないプロトコルのパケットには、-1（全て許可）を設定する
+            if (src_port != NULL) {
+                *src_port = -1;
+            }
+            if (dst_port != NULL) {
+                *dst_port = -1;
+            }
+            break;
     }
 
     return true;
@@ -72,52 +79,40 @@ bool config_to_string(ConfigType config, char *str_out, size_t str_len)
         return false;
     }
 
-    if (config == CONFIG_INPUT_POLICY) {
-        snprintf(str_out, str_len, "INPUT_POLICY");
-        return true;
+    switch (config) {
+        case CONFIG_INPUT_POLICY:
+            snprintf(str_out, str_len, "INPUT_POLICY");
+            break;
+        case CONFIG_OUTPUT_POLICY:
+            snprintf(str_out, str_len, "OUTPUT_POLICY");
+            break;
+        case CONFIG_DEFAULT_LOGGING:
+            snprintf(str_out, str_len, "DEFAULT_LOGGING");
+            break;
+        case CONFIG_LOGFILE_ROTATE:
+            snprintf(str_out, str_len, "LOGFILE_ROTATE");
+            break;
+        case CONFIG_LOG_ROTATION_SIZE:
+            snprintf(str_out, str_len, "LOG_ROTATION_SIZE_MB");
+            break;
+        case CONFIG_ICMP_TIMEOUT_SEC:
+            snprintf(str_out, str_len, "ICMP_CONNECTION_TIMEOUT_SEC");
+            break;
+        case CONFIG_TCP_TIMEOUT_SEC:
+            snprintf(str_out, str_len, "TCP_CONNECTION_TIMEOUT_SEC");
+            break;
+        case CONFIG_UDP_TIMEOUT_SEC:
+            snprintf(str_out, str_len, "UDP_CONNECTION_TIMEOUT_SEC");
+            break;
+        case CONFIG_STATE_TABLE_CLEAN_INTERVAL:
+            snprintf(str_out, str_len, "STATE_TABLE_CLEAN_INTERVAL_SEC");
+            break;
+        default:
+            return false;
+            break; // NOT REACHED
     }
 
-    if (config == CONFIG_OUTPUT_POLICY) {
-        snprintf(str_out, str_len, "OUTPUT_POLICY");
-        return true;
-    }
-
-    if (config == CONFIG_DEFAULT_LOGGING) {
-        snprintf(str_out, str_len, "DEFAULT_LOGGING");
-        return true;
-    }
-
-    if (config == CONFIG_LOGFILE_ROTATE) {
-        snprintf(str_out, str_len, "LOGFILE_ROTATE");
-        return true;
-    }
-
-    if (config == CONFIG_LOG_ROTATION_SIZE) {
-        snprintf(str_out, str_len, "LOG_ROTATION_SIZE_MB");
-        return true;
-    }
-
-    if (config == CONFIG_ICMP_TIMEOUT_SEC) {
-        snprintf(str_out, str_len, "ICMP_CONNECTION_TIMEOUT_SEC");
-        return true;
-    }
-
-    if (config == CONFIG_TCP_TIMEOUT_SEC) {
-        snprintf(str_out, str_len, "TCP_CONNECTION_TIMEOUT_SEC");
-        return true;
-    }
-
-    if (config == CONFIG_UDP_TIMEOUT_SEC) {
-        snprintf(str_out, str_len, "UDP_CONNECTION_TIMEOUT_SEC");
-        return true;
-    }
-
-    if (config == CONFIG_STATE_TABLE_CLEAN_INTERVAL) {
-        snprintf(str_out, str_len, "STATE_TABLE_CLEAN_INTERVAL_SEC");
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 bool rule_chain_to_string(ChainType chain, char *str_out, size_t str_len)
@@ -127,16 +122,19 @@ bool rule_chain_to_string(ChainType chain, char *str_out, size_t str_len)
         return false;
     }
 
-    if (chain == CHAIN_INPUT) {
-        snprintf(str_out, str_len, "INPUT");
-        return true;
-    }
-    if (chain == CHAIN_OUTPUT) {
-        snprintf(str_out, str_len, "OUTPUT");
-        return true;
+    switch (chain) {
+        case CHAIN_INPUT:
+            snprintf(str_out, str_len, "INPUT");
+            break;
+        case CHAIN_OUTPUT:
+            snprintf(str_out, str_len, "OUTPUT");
+            break;
+        default:
+            return false;
+            break; // NOT REACHED
     }
 
-    return false;
+    return true;
 }
 
 bool rule_protocol_to_string(ProtocolType proto, char *str_out, size_t str_len)
@@ -146,24 +144,25 @@ bool rule_protocol_to_string(ProtocolType proto, char *str_out, size_t str_len)
         return false;
     }
 
-    if (proto == PROTO_ANY) {
-        snprintf(str_out, str_len, "ANY");
-        return true;
-    }
-    if (proto == PROTO_ICMP) {
-        snprintf(str_out, str_len, "ICMP");
-        return true;
-    }
-    if (proto == PROTO_TCP) {
-        snprintf(str_out, str_len, "TCP");
-        return true;
-    }
-    if (proto == PROTO_UDP) {
-        snprintf(str_out, str_len, "UDP");
-        return true;
+    switch (proto) {
+        case PROTO_ANY:
+            snprintf(str_out, str_len, "ANY");
+            break;
+        case PROTO_ICMP:
+            snprintf(str_out, str_len, "ICMP");
+            break;
+        case PROTO_TCP:
+            snprintf(str_out, str_len, "TCP");
+            break;
+        case PROTO_UDP:
+            snprintf(str_out, str_len, "UDP");
+            break;
+        default:
+            return false;
+            break; // NOT REACHED
     }
 
-    return false;
+    return true;
 }
 
 bool rule_port_to_string(int port, char *str_out, size_t str_len)
@@ -191,16 +190,19 @@ bool rule_action_to_string(ActionType action, char *str_out, size_t str_len)
         return false;
     }
 
-    if (action == ACTION_ACCEPT) {
-        snprintf(str_out, str_len, "ACCEPT");
-        return true;
-    }
-    if (action == ACTION_DROP) {
-        snprintf(str_out, str_len, "DROP");
-        return true;
+    switch (action) {
+        case ACTION_ACCEPT:
+            snprintf(str_out, str_len, "ACCEPT");
+            break;
+        case ACTION_DROP:
+            snprintf(str_out, str_len, "DROP");
+            break;
+        default:
+            return false;
+            break; // NOT REACHED
     }
 
-    return false;
+    return true;
 }
 
 bool rule_log_to_string(LogStatus log, char *str_out, size_t str_len)
@@ -210,16 +212,19 @@ bool rule_log_to_string(LogStatus log, char *str_out, size_t str_len)
         return false;
     }
 
-    if (log == LOG_ENABLED) {
-        snprintf(str_out, str_len, "LOG");
-        return true;
-    }
-    if (log == LOG_DISABLED) {
-        snprintf(str_out, str_len, "NOLOG");
-        return true;
+    switch (log) {
+        case LOG_ENABLED:
+            snprintf(str_out, str_len, "LOG");
+            break;
+        case LOG_DISABLED:
+            snprintf(str_out, str_len, "NOLOG");
+            break;
+        default:
+            return false;
+            break; // NOT REACHED
     }
 
-    return false;
+    return true;
 }
 
 bool rule_state_to_string(RuleState state, char *str_out, size_t str_len)
@@ -229,16 +234,19 @@ bool rule_state_to_string(RuleState state, char *str_out, size_t str_len)
         return false;
     }
 
-    if (state == RULE_ENABLED) {
-        snprintf(str_out, str_len, "ENABLED");
-        return true;
-    }
-    if (state == RULE_DISABLED) {
-        snprintf(str_out, str_len, "DISABLED");
-        return true;
+    switch (state) {
+        case RULE_ENABLED:
+            snprintf(str_out, str_len, "ENABLED");
+            break;
+        case RULE_DISABLED:
+            snprintf(str_out, str_len, "DISABLED");
+            break;
+        default:
+            return false;
+            break; // NOT REACHED
     }
 
-    return false;
+    return true;
 }
 
 int parse_config_number(const char *config_number, int min_num)
@@ -264,35 +272,27 @@ ConfigType parse_config_string(const char *config_string)
     if (strcmp(config_string, "INPUT_POLICY") == 0) {
         return CONFIG_INPUT_POLICY;
     }
-
     if (strcmp(config_string, "OUTPUT_POLICY") == 0) {
         return CONFIG_OUTPUT_POLICY;
     }
-
     if (strcmp(config_string, "DEFAULT_LOGGING") == 0) {
         return CONFIG_DEFAULT_LOGGING;
     }
-
     if (strcmp(config_string, "LOGFILE_ROTATE") == 0) {
         return CONFIG_LOGFILE_ROTATE;
     }
-
     if (strcmp(config_string, "LOG_ROTATION_SIZE_MB") == 0) {
         return CONFIG_LOG_ROTATION_SIZE;
     }
-
     if (strcmp(config_string, "ICMP_CONNECTION_TIMEOUT_SEC") == 0) {
         return CONFIG_ICMP_TIMEOUT_SEC;
     }
-
     if (strcmp(config_string, "TCP_CONNECTION_TIMEOUT_SEC") == 0) {
         return CONFIG_TCP_TIMEOUT_SEC;
     }
-
     if (strcmp(config_string, "UDP_CONNECTION_TIMEOUT_SEC") == 0) {
         return CONFIG_UDP_TIMEOUT_SEC;
     }
-
     if (strcmp(config_string, "STATE_TABLE_CLEAN_INTERVAL_SEC") == 0) {
         return CONFIG_STATE_TABLE_CLEAN_INTERVAL;
     }
