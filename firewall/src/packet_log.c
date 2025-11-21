@@ -46,14 +46,16 @@ static bool format_other_log(
     ActionType policy
 );
 
-bool log_rotation(FILE **log_fp, int rotate, int rotation_size_mb);
+bool log_rotation(FILE **log_fp, size_t rotate, size_t rotation_size_mb);
 
 void log_packet(
     FILE **log_fp,
     const unsigned char *packet,
     ChainType chain_type,
     FirewallRule *match_rule,
-    ActionType policy
+    ActionType policy,
+    size_t logfile_rotate,
+    size_t log_rotation_size
 )
 {
     int fd = -1;
@@ -94,7 +96,7 @@ void log_packet(
             break;
     }
 
-    if (log_rotation(log_fp, LOGFILE_ROTATE, LOG_ROTATION_SIZE_MB) == false) {
+    if (log_rotation(log_fp, logfile_rotate, log_rotation_size) == false) {
         goto cleanup;
     }
 
@@ -247,7 +249,7 @@ static bool format_other_log(
     return true;
 }
 
-bool log_rotation(FILE **log_fp, int rotate, int rotation_size_mb)
+bool log_rotation(FILE **log_fp, size_t rotate, size_t rotation_size_mb)
 {
     unsigned int rotation_size_bytes = rotation_size_mb * 1024 * 1024;
     struct stat st;

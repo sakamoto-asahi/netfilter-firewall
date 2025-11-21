@@ -9,7 +9,9 @@ void log_packet(
     const unsigned char *packet,
     ChainType chain_type,
     FirewallRule *match_rule,
-    ActionType policy
+    ActionType policy,
+    size_t logfile_rotate,
+    size_t log_rotation_size
 );
 
 #endif

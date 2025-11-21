@@ -181,7 +181,10 @@ void delete_entry(StateTableEntry **head, StateTableEntry *entry_to_delete)
     free(entry_to_delete);
 }
 
-bool check_entry_timeout(StateTableEntry *entry_to_check)
+bool check_entry_timeout(
+    StateTableEntry *entry_to_check,
+    StateTimeouts state_timeouts
+)
 {
     if (entry_to_check == NULL) {
         errno = EINVAL;
@@ -191,13 +194,13 @@ bool check_entry_timeout(StateTableEntry *entry_to_check)
     int timeout_sec;
     switch (entry_to_check->protocol) {
         case IPPROTO_ICMP:
-            timeout_sec = ICMP_CONNECTION_TIMEOUT_SEC;
+            timeout_sec = state_timeouts.icmp_timeout_sec;
             break;
         case IPPROTO_TCP:
-            timeout_sec = TCP_CONNECTION_TIMEOUT_SEC;
+            timeout_sec = state_timeouts.tcp_timeout_sec;
             break;
         case IPPROTO_UDP:
-            timeout_sec = UDP_CONNECTION_TIMEOUT_SEC;
+            timeout_sec = state_timeouts.udp_timeout_sec;
             break;
         default:
             return false;
@@ -211,7 +214,10 @@ bool check_entry_timeout(StateTableEntry *entry_to_check)
     }
 }
 
-StateTableEntry *lookup_state_table(StateTableEntry *head, const unsigned char *packet)
+StateTableEntry *lookup_state_table(
+    StateTableEntry *head,
+    const unsigned char *packet
+)
 {
     if (head == NULL || packet == NULL) {
         errno = EINVAL;
@@ -299,12 +305,12 @@ StateTableEntry *lookup_state_table(StateTableEntry *head, const unsigned char *
     return NULL;
 }
 
-void cleanup_expired_entries(StateTableEntry **head)
+void cleanup_expired_entries(StateTableEntry **head, StateTimeouts state_timeouts)
 {
     StateTableEntry *current_entry = *head;
     while (current_entry != NULL) {
         StateTableEntry *next_entry = current_entry->next;
-        if (check_entry_timeout(current_entry) == true) {
+        if (check_entry_timeout(current_entry, state_timeouts) == true) {
             delete_entry(head, current_entry);
         }
         current_entry = next_entry;
@@ -330,10 +336,11 @@ void destroy_state_table(StateTableEntry **head)
 StateUpdateResult track_connection_state(
     StateTableEntry **head,
     StateTableEntry *entry_to_update,
-    const unsigned char *packet
+    const unsigned char *packet,
+    StateTimeouts state_timeouts
 )
 {
-    if (check_entry_timeout(entry_to_update) == true) {
+    if (check_entry_timeout(entry_to_update, state_timeouts) == true) {
         delete_entry(head, entry_to_update);
         return STATE_TIMED_OUT;
     }

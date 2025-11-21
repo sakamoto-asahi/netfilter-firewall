@@ -46,13 +46,6 @@ bool logging_command(const char *filepath, LogStatus logging)
         goto cleanup;
     }
 
-    // 設定ファイルの正当性を検証
-    if (is_valid_config_file(tmp_fp) == FILE_INVALID) {
-        err_msg = "エラー：設定ファイルが不正な形式のため、"
-                  "ポリシーを変更できません。";
-        goto cleanup;
-    }
-
     // ログ設定の変更
     char target_key[CONFIG_MAX_LEN];
     char target_value[CONFIG_MAX_LEN];

@@ -87,6 +87,36 @@ bool config_to_string(ConfigType config, char *str_out, size_t str_len)
         return true;
     }
 
+    if (config == CONFIG_LOGFILE_ROTATE) {
+        snprintf(str_out, str_len, "LOGFILE_ROTATE");
+        return true;
+    }
+
+    if (config == CONFIG_LOG_ROTATION_SIZE) {
+        snprintf(str_out, str_len, "LOG_ROTATION_SIZE_MB");
+        return true;
+    }
+
+    if (config == CONFIG_ICMP_TIMEOUT_SEC) {
+        snprintf(str_out, str_len, "ICMP_CONNECTION_TIMEOUT_SEC");
+        return true;
+    }
+
+    if (config == CONFIG_TCP_TIMEOUT_SEC) {
+        snprintf(str_out, str_len, "TCP_CONNECTION_TIMEOUT_SEC");
+        return true;
+    }
+
+    if (config == CONFIG_UDP_TIMEOUT_SEC) {
+        snprintf(str_out, str_len, "UDP_CONNECTION_TIMEOUT_SEC");
+        return true;
+    }
+
+    if (config == CONFIG_STATE_TABLE_CLEAN_INTERVAL) {
+        snprintf(str_out, str_len, "STATE_TABLE_CLEAN_INTERVAL_SEC");
+        return true;
+    }
+
     return false;
 }
 
@@ -211,6 +241,19 @@ bool rule_state_to_string(RuleState state, char *str_out, size_t str_len)
     return false;
 }
 
+int parse_config_number(const char *config_number, int min_num)
+{
+    char *endptr;
+    long ret = strtol(config_number, &endptr, 10);
+    if (*endptr != '\0') {
+        return min_num - 1;
+    } else if (ret < min_num || ret > INT_MAX) {
+        return min_num - 1;
+    }
+
+    return ret;
+}
+
 ConfigType parse_config_string(const char *config_string)
 {
     if (config_string == NULL) {
@@ -228,6 +271,30 @@ ConfigType parse_config_string(const char *config_string)
 
     if (strcmp(config_string, "DEFAULT_LOGGING") == 0) {
         return CONFIG_DEFAULT_LOGGING;
+    }
+
+    if (strcmp(config_string, "LOGFILE_ROTATE") == 0) {
+        return CONFIG_LOGFILE_ROTATE;
+    }
+
+    if (strcmp(config_string, "LOG_ROTATION_SIZE_MB") == 0) {
+        return CONFIG_LOG_ROTATION_SIZE;
+    }
+
+    if (strcmp(config_string, "ICMP_CONNECTION_TIMEOUT_SEC") == 0) {
+        return CONFIG_ICMP_TIMEOUT_SEC;
+    }
+
+    if (strcmp(config_string, "TCP_CONNECTION_TIMEOUT_SEC") == 0) {
+        return CONFIG_TCP_TIMEOUT_SEC;
+    }
+
+    if (strcmp(config_string, "UDP_CONNECTION_TIMEOUT_SEC") == 0) {
+        return CONFIG_UDP_TIMEOUT_SEC;
+    }
+
+    if (strcmp(config_string, "STATE_TABLE_CLEAN_INTERVAL_SEC") == 0) {
+        return CONFIG_STATE_TABLE_CLEAN_INTERVAL;
     }
 
     return CONFIG_UNKNOWN;

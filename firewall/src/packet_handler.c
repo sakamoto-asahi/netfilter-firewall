@@ -18,12 +18,16 @@ int handle_input_packet(
 )
 {
     PacketHandlerArgs *args = (PacketHandlerArgs *)data;
+    FirewallConfig *config = args->config;
     pthread_rwlock_t *rwlock = args->rwlock;
     StateTableEntry **head = args->head;
     FirewallRule *rules = NULL;
     size_t rule_count = 0;
-    ActionType policy = *(args->policy);
-    LogStatus log_flag = *(args->default_logging);
+    ActionType policy = config->input_policy;
+    LogStatus log_flag = config->default_logging;
+    size_t logfile_rotate = config->logfile_rotate;
+    size_t log_rotation_size = config->log_rotation_size;
+    StateTimeouts state_timeouts = config->state_timeouts;
     FILE **log_fp = args->log_fp;
     FirewallRule *match_rule = NULL;
 
@@ -49,7 +53,8 @@ int handle_input_packet(
     // ルールが存在しないことが判明した時点でパケットをポリシーに従い処理する
     if ((rules == NULL || rule_count == 0) && *head == NULL) {
         if (log_flag == LOG_ENABLED) {
-            log_packet(log_fp, packet, CHAIN_INPUT, match_rule, policy);
+            log_packet(log_fp, packet, CHAIN_INPUT, match_rule, policy,
+                       logfile_rotate, log_rotation_size);
         }
         if (policy == ACTION_ACCEPT) {
             return nfq_set_verdict(qh, packet_id, NF_ACCEPT, 0, NULL);
@@ -64,7 +69,7 @@ int handle_input_packet(
     StateTableEntry *match_entry = lookup_state_table(*head, packet);
     if (match_entry != NULL) {
         StateUpdateResult update_result =
-            track_connection_state(head, match_entry, packet);
+            track_connection_state(head, match_entry, packet, state_timeouts);
         switch (update_result) {
             case STATE_UPDATED:
                 packet_result = PACKET_ACCEPT;
@@ -92,7 +97,8 @@ int handle_input_packet(
     }
 
     if (log_flag == LOG_ENABLED) {
-        log_packet(log_fp, packet, CHAIN_INPUT, match_rule, policy);
+        log_packet(log_fp, packet, CHAIN_INPUT, match_rule, policy,
+                   logfile_rotate, log_rotation_size);
     }
 
     switch (packet_result) {
@@ -116,12 +122,16 @@ int handle_output_packet(
 )
 {
     PacketHandlerArgs *args = (PacketHandlerArgs *)data;
+    FirewallConfig *config = args->config;
     pthread_rwlock_t *rwlock = args->rwlock;
     StateTableEntry **head = args->head;
     FirewallRule *rules = NULL;
     size_t rule_count = 0;
-    ActionType policy = *(args->policy);
-    LogStatus log_flag = *(args->default_logging);
+    ActionType policy = config->output_policy;
+    LogStatus log_flag = config->default_logging;
+    size_t logfile_rotate = config->logfile_rotate;
+    size_t log_rotation_size = config->log_rotation_size;
+    StateTimeouts state_timeouts = config->state_timeouts;
     FILE **log_fp = args->log_fp;
     FirewallRule *match_rule = NULL;
 
@@ -147,7 +157,8 @@ int handle_output_packet(
     // ルールが存在しないことが判明した時点でパケットをポリシーに従い処理する
     if ((rules == NULL || rule_count == 0) && *head == NULL) {
         if (log_flag == LOG_ENABLED) {
-            log_packet(log_fp, packet, CHAIN_OUTPUT, match_rule, policy);
+            log_packet(log_fp, packet, CHAIN_OUTPUT, match_rule, policy,
+                       logfile_rotate, log_rotation_size);
         }
         if (policy == ACTION_ACCEPT) {
             if (is_state_tracking_required(packet) == true) {
@@ -167,7 +178,7 @@ int handle_output_packet(
     StateTableEntry *match_entry = lookup_state_table(*head, packet);
     if (match_entry != NULL) {
         StateUpdateResult update_result =
-            track_connection_state(head, match_entry, packet);
+            track_connection_state(head, match_entry, packet, state_timeouts);
         switch (update_result) {
             case STATE_UPDATED:
                 packet_result = PACKET_ACCEPT;
@@ -195,7 +206,8 @@ int handle_output_packet(
     }
 
     if (log_flag == LOG_ENABLED) {
-        log_packet(log_fp, packet, CHAIN_OUTPUT, match_rule, policy);
+        log_packet(log_fp, packet, CHAIN_OUTPUT, match_rule, policy,
+                   logfile_rotate, log_rotation_size);
     }
 
     switch (packet_result) {

@@ -12,9 +12,8 @@ typedef struct {
     StateTableEntry **head;
     FirewallRule **fw_rules;
     size_t *fw_rule_count;
-    ActionType *policy;
-    LogStatus *default_logging;
     FILE **log_fp;
+    FirewallConfig *config;
 } PacketHandlerArgs;
 
 int handle_input_packet(
