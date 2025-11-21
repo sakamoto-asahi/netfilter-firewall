@@ -16,6 +16,7 @@
 #include "command/export_command.h"
 #include "command/change_policy_command.h"
 #include "command/logging_command.h"
+#include "command/reload_config_command.h"
 #include "command/shutdown_command.h"
 
 typedef enum {
@@ -29,6 +30,7 @@ typedef enum {
     CMD_UNKNOWN,
     CMD_CHANGE_POLICY,
     CMD_LOGGING,
+    CMD_RELOAD,
     CMD_SHUTDOWN
 } CommandType;
 
@@ -210,6 +212,11 @@ int main(int argc, char *argv[])
                 return 1;
             }
             break;
+        case CMD_RELOAD:
+            if (reload_config_command() == false) {
+                return 1;
+            }
+            break;
         case CMD_SHUTDOWN:
             if (shutdown_command() == false) {
                 return 1;
@@ -237,6 +244,7 @@ static void print_usage(void)
     printf("  export    ルールを外部ファイルに書き出す\n");
     printf("  policy    ルールのポリシーを変更する\n");
     printf("  logging   ルールと一致しなかったパケットのログを取るかどうか設定する\n");
+    printf("  reload    設定ファイルを再読み込みする\n");
     printf("  shutdown  ファイアウォールを終了する。\n");
     printf("\nオプション:\n");
     printf("  -c <chain>      ルールのチェインを指定 (INPUT, OUTPUT)\n");
@@ -278,6 +286,9 @@ static CommandType parse_command(const char *cmd)
     }
     if (strcmp(cmd, "logging") == 0) {
         return CMD_LOGGING;
+    }
+    if (strcmp(cmd, "reload") == 0) {
+        return CMD_RELOAD;
     }
     if (strcmp(cmd, "shutdown") == 0) {
         return CMD_SHUTDOWN;
