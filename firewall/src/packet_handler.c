@@ -57,6 +57,11 @@ int handle_input_packet(
                        logfile_rotate, log_rotation_size);
         }
         if (policy == ACTION_ACCEPT) {
+            if (is_state_tracking_required(packet) == true) {
+                pthread_rwlock_wrlock(rwlock);
+                insert_state_entry(head, packet);
+                pthread_rwlock_unlock(rwlock);
+            }
             return nfq_set_verdict(qh, packet_id, NF_ACCEPT, 0, NULL);
         } else {
             return nfq_set_verdict(qh, packet_id, NF_DROP, 0, NULL);
@@ -103,6 +108,11 @@ int handle_input_packet(
 
     switch (packet_result) {
         case PACKET_ACCEPT:
+            if (is_state_tracking_required(packet) == true) {
+                pthread_rwlock_wrlock(rwlock);
+                insert_state_entry(head, packet);
+                pthread_rwlock_unlock(rwlock);
+            }
             return nfq_set_verdict(qh, packet_id, NF_ACCEPT, 0, NULL);
             break; // NOT REACHED
         case PACKET_DROP:
