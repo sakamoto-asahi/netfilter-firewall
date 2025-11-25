@@ -76,7 +76,6 @@ bool export_command(const char *src_file, const char *dst_file)
     ret = true;
 
     cleanup:
-    free(tmp_file);
     if (ret == false) {
         fprintf(stderr, "%s\n", err_msg);
     }
@@ -94,5 +93,6 @@ bool export_command(const char *src_file, const char *dst_file)
             unlink(tmp_file);
         }
     }
+    free(tmp_file);
     return ret;
 }
