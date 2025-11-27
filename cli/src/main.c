@@ -31,6 +31,7 @@ typedef enum {
     CMD_CHANGE_POLICY,
     CMD_LOGGING,
     CMD_RELOAD,
+    CMD_HELP,
     CMD_SHUTDOWN
 } CommandType;
 
@@ -222,6 +223,9 @@ int main(int argc, char *argv[])
                 return 1;
             }
             break;
+        case CMD_HELP:
+            print_usage();
+            break;
         case CMD_UNKNOWN:
         default:
             fprintf(stderr, "エラー：%sというコマンドは存在しません。\n", cmd);
@@ -233,29 +237,38 @@ int main(int argc, char *argv[])
 
 static void print_usage(void)
 {
-    printf("使用法: fwctl <command> [options]\n");
-    printf("コマンド:\n");
-    printf("  add       新しいルールを追加する\n");
-    printf("  update    指定したルールを更新する\n");
-    printf("  show      ルールを一覧表示する\n");
-    printf("  delete    指定したルールを削除する\n");
-    printf("  clear     すべてのルールを削除する\n");
-    printf("  import    外部ファイルからルールを読み込む\n");
-    printf("  export    ルールを外部ファイルに書き出す\n");
-    printf("  policy    ルールのポリシーを変更する\n");
-    printf("  logging   ルールと一致しなかったパケットのログを取るかどうか設定する\n");
-    printf("  reload    設定ファイルを再読み込みする\n");
-    printf("  shutdown  ファイアウォールを終了する。\n");
-    printf("\nオプション:\n");
-    printf("  -c <chain>      ルールのチェインを指定 (INPUT, OUTPUT)\n");
-    printf("  -p <protocol>   プロトコルを指定 (TCP, UDP, ICMP)\n");
-    printf("  -s <ip>         送信元IPアドレスを指定 (ANY可)\n");
-    printf("  -S <port>       送信元ポート番号を指定 (ANY可)\n");
-    printf("  -d <ip>         宛先IPアドレスを指定 (ANY可)\n");
-    printf("  -D <port>       宛先ポート番号を指定 (ANY可)\n");
-    printf("  -a <action>     アクションを指定 (ACCEPT, DROP)\n");
-    printf("  -l <status>     ログの有効・無効を指定 (ENABLED, DISABLED)\n");
-    printf("  -r <state>      ルールの有効・無効を指定 (ENABLED, DISABLED)\n");
+    printf("使用方法：nfw-ctl <コマンド> [オプション]\n");
+    printf("コマンド一覧：\n");
+    printf("  add       新しいフィルタリングルールを追加します。\n");
+    printf("            引数にオプションでルールを指定します。\n\n");
+    printf("  update    指定した行番号のルールを更新します。\n");
+    printf("            引数に行番号とチェイン（-c）、更新内容を指定します。\n\n");
+    printf("  show      現在のフィルタリングルールを表示します。\n\n");
+    printf("  delete    指定した行番号のルールを削除します。\n");
+    printf("            引数に行番号とチェイン（-c）を指定します。\n\n");
+    printf("  clear     すべてのフィルタリングルールを削除します。\n\n");
+    printf("  import    外部ファイルからルールを読み込み、現在のルールに上書きします。\n");
+    printf("            引数に外部のルールファイルのパスを指定します。\n\n");
+    printf("  export    現在のルールを指定したファイルに出力します。\n");
+    printf("            引数に出力先ファイルのパスを指定します。\n\n");
+    printf("  policy    デフォルトポリシーを変更します。\n");
+    printf("            引数にチェイン（-c）とアクション（-a）を指定します。\n\n");
+    printf("  logging   デフォルトのログ設定を指定します。\n");
+    printf("            引数にログ設定（-l）を指定します。\n\n");
+    printf("  reload    設定ファイルを再読み込みし、設定を適用します。\n\n");
+    printf("  shutdown  ファイアウォール本体をシャットダウンします。\n\n");
+    printf("  help      このヘルプメッセージを表示します。\n\n");
+    printf("\n");
+    printf("オプション一覧：\n");
+    printf("  -c, --chain      <INPUT|OUTPUT>      チェインを指定\n");
+    printf("  -p, --protocol   <ICMP|TCP|UDP>      プロトコルを指定\n");
+    printf("  -s, --src-ip     <IPアドレス>        送信元IPアドレスを指定\n");
+    printf("  -S, --src-port   <ポート番号>        送信元ポート番号を指定\n");
+    printf("  -d, --dst-ip     <IPアドレス>        宛先IPアドレスを指定\n");
+    printf("  -D, --dst-port   <ポート番号>        宛先ポート番号を指定\n");
+    printf("  -a, --action     <ACCEPT|DROP>       パケットのアクションを指定\n");
+    printf("  -l, --log        <LOG|NOLOG>         ログの有無を指定\n");
+    printf("  -r, --rule       <ENABLED|DISABLED>  ルールの有効・無効を設定\n");
 }
 
 static CommandType parse_command(const char *cmd)
@@ -292,6 +305,9 @@ static CommandType parse_command(const char *cmd)
     }
     if (strcmp(cmd, "shutdown") == 0) {
         return CMD_SHUTDOWN;
+    }
+    if (strcmp(cmd, "help") == 0) {
+        return CMD_HELP;
     }
     return CMD_UNKNOWN;
 }
