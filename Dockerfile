@@ -22,6 +22,10 @@ COPY config/nftables.conf /etc/nftables.conf
 WORKDIR /app
 RUN make
 
+# 実行ファイルを実行パスにコピー
+RUN cp /app/build/fw /usr/local/bin/nfw
+RUN cp /app/build/fw_ctl /usr/local/bin/nfw-ctl
+
 # エントリーポイントの設定
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
