@@ -6,14 +6,17 @@
 #include <netinet/ip.h>
 #include "stateful_inspection.h"
 
-#define FIREWALL_CONFIG_DIR "config/"
-#define LOG_DIR "log/"
-#define FIREWALL_CONFIG_FILE "config/firewall.conf"
-#define TMP_FIREWALL_CONFIG_FILE "config/firewall.tmp"
-#define RULE_FILE "config/rules.csv"
-#define TMP_RULE_FILE "config/rules.tmp"
-#define LOG_FILE "log/packet.log"
+// 各ファイルのパスの定義
+#define APP_DIR "/app/" // プログラムの保存場所
+#define FIREWALL_CONFIG_DIR APP_DIR "config/"
+#define LOG_DIR APP_DIR "log/"
+#define FIREWALL_CONFIG_FILE APP_DIR "config/firewall.conf"
+#define TMP_FIREWALL_CONFIG_FILE APP_DIR "config/firewall.tmp"
+#define RULE_FILE APP_DIR "config/rules.csv"
+#define TMP_RULE_FILE APP_DIR "config/rules.tmp"
+#define LOG_FILE APP_DIR "log/packet.log"
 #define DOMAIN_SOCKET_PATH "/var/run/netfilter_firewall/firewall.sock"
+
 #define LOG_FILE_MAX_LEN 256
 #define CHAIN_MAX_LEN 8
 #define PROTOCOL_MAX_LEN 8
