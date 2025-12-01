@@ -27,12 +27,12 @@ typedef enum {
     CMD_CLEAR,
     CMD_IMPORT,
     CMD_EXPORT,
-    CMD_UNKNOWN,
     CMD_CHANGE_POLICY,
     CMD_LOGGING,
     CMD_RELOAD,
     CMD_HELP,
-    CMD_SHUTDOWN
+    CMD_SHUTDOWN,
+    CMD_UNKNOWN
 } CommandType;
 
 static void print_usage(void);
@@ -40,7 +40,7 @@ static CommandType parse_command(const char *cmd);
 
 static struct option longopts[] = {
     {"chain", required_argument, NULL, 'c'},
-    {"proto", required_argument, NULL, 'p'},
+    {"protocol", required_argument, NULL, 'p'},
     {"src-ip", required_argument, NULL, 's'},
     {"dst-ip", required_argument, NULL, 'd'},
     {"src-port", required_argument, NULL, 'S'},
