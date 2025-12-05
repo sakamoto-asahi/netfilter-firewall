@@ -409,3 +409,92 @@ static void format_address_port(char *buf, size_t buf_size,
         snprintf(buf, buf_size, "%s:%d", ip_str, port_num);
     }
 }
+
+RuleClearResult clear_rules(FILE *fp, ChainType target_chain)
+{
+    RuleCounts counts;
+    FirewallRule *input_rules = NULL;
+    FirewallRule *output_rules = NULL;
+    RuleClearResult ret = CLEAR_ERR_INTERNAL;
+
+    if (fp == NULL) {
+        errno = EINVAL;
+        goto cleanup;
+    }
+
+    int fd = fileno(fp);
+    if (fd == -1) {
+        goto cleanup;
+    }
+
+    switch (target_chain) {
+        case CHAIN_INPUT:
+            if (load_rules_by_chain(fp, NULL, &output_rules, &counts) == false) {
+                goto cleanup;
+            }
+
+            if (counts.input_count == 0) {
+                // INPUTチェインのルールが空の場合削除するルールがないのでエラー
+                ret = CLEAR_ERR_NO_INPUT_RULES;
+                goto cleanup;
+            } else if (counts.output_count == 0) {
+                // OUTPUTチェインのルールが空の場合すべてのルールを削除
+                if (ftruncate(fd, 0) == -1) {
+                    goto cleanup;
+                }
+            } else {
+                // OUTPUTチェインのルールだけファイルに書き込むことで、
+                // INPUTチェインのルールをクリアする
+                if (save_rules_to_file(fp, output_rules, counts.output_count) == false) {
+                    goto cleanup;
+                }
+            }
+            break;
+        case CHAIN_OUTPUT:
+            if (load_rules_by_chain(fp, &input_rules, NULL, &counts) == false) {
+                goto cleanup;
+            }
+
+            if (counts.output_count == 0) {
+                // OUTPUTチェインのルールが空の場合削除するルールがないのでエラー
+                ret = CLEAR_ERR_NO_OUTPUT_RULES;
+                goto cleanup;
+            } else if (counts.input_count == 0) {
+                // INPUTチェインのルールが空の場合すべてのルールを削除
+                if (ftruncate(fd, 0) == -1) {
+                    goto cleanup;
+                }
+            } else {
+                // INPUTチェインのルールだけファイルに書き込むことで、
+                // OUTPUTチェインのルールをクリアする
+                if (save_rules_to_file(fp, input_rules, counts.input_count) == false) {
+                    goto cleanup;
+                }
+            }
+            break;
+        case CHAIN_UNSPECIFIED:
+            if (get_rule_counts_from_file(fp, &counts) == false) {
+                goto cleanup;
+            }
+
+            if (counts.total_count == 0) {
+                ret = CLEAR_ERR_NO_RULES;
+                goto cleanup;
+            } else {
+                if (ftruncate(fd, 0) == -1) {
+                    goto cleanup;
+                }
+            }
+            break;
+        default:
+            goto cleanup;
+            break; // NOT REACHED
+    }
+
+    ret = CLEAR_SUCCESS;
+
+    cleanup:
+    free(input_rules);
+    free(output_rules);
+    return ret;
+}

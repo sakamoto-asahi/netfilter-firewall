@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
             }
             break;
         case CMD_CLEAR:
-            if (clear_command(RULE_FILE) == false) {
+            if (clear_command(RULE_FILE, rule.chain) == false) {
                 return 1;
             }
             break;
