@@ -5,9 +5,11 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 #include "firewall_config.h"
+#include "firewall_io.h"
+#include "rule_manager.h"
 #include "domain_socket_utils.h"
 
-bool clear_command(const char *filepath)
+bool clear_command(const char *filepath, ChainType target_chain)
 {
     char *err_msg = "予期せぬエラーが発生したため、"
                     "ルールのクリアを完了できませんでした。";
@@ -34,18 +36,28 @@ bool clear_command(const char *filepath)
         goto cleanup;
     }
 
-    // ファイルにルールがなければエラー
-    struct stat st;
-    if (stat(filepath, &st) == -1) {
-        goto cleanup;
-    }
-    if (st.st_size == 0) {
-        err_msg = "エラー：ルールは存在しません。";
-        goto cleanup;
-    }
-
-    if (ftruncate(fd, 0) == -1) {
-        goto cleanup;
+    RuleClearResult clear_result = clear_rules(rule_fp, target_chain);
+    switch (clear_result) {
+        case CLEAR_SUCCESS:
+            break;
+        case CLEAR_ERR_NO_INPUT_RULES:
+            err_msg = "エラー：INPUTチェインにルールは存在しません。";
+            goto cleanup;
+            break; // NOT REACHED
+        case CLEAR_ERR_NO_OUTPUT_RULES:
+            err_msg = "エラー：OUTPUTチェインにルールは存在しません。";
+            goto cleanup;
+            break; // NOT REACHED
+        case CLEAR_ERR_NO_RULES:
+            err_msg = "エラー：ルールは存在しません。";
+            goto cleanup;
+            break; // NOT REACHED
+        case CLEAR_ERR_INTERNAL:
+            goto cleanup;
+            break; // NOT REACHED
+        default:
+            goto cleanup;
+            break; // NOT REACHED
     }
 
     // ファイアウォールがファイルを閲覧できるよう、共有ロックに変更

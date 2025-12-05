@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
             }
             break;
         case CMD_CLEAR:
-            if (clear_command(RULE_FILE) == false) {
+            if (clear_command(RULE_FILE, rule.chain) == false) {
                 return 1;
             }
             break;
@@ -246,7 +246,8 @@ static void print_usage(void)
     printf("  show      現在のフィルタリングルールを表示します。\n\n");
     printf("  delete    指定した行番号のルールを削除します。\n");
     printf("            引数に行番号とチェイン（-c）を指定します。\n\n");
-    printf("  clear     すべてのフィルタリングルールを削除します。\n\n");
+    printf("  clear     すべてのフィルタリングルールを削除します。\n");
+    printf("            特定のチェインのルールだけを削除する場合、引数にチェイン（-c）を指定します。\n\n");
     printf("  import    外部ファイルからルールを読み込み、現在のルールに上書きします。\n");
     printf("            引数に外部のルールファイルのパスを指定します。\n\n");
     printf("  export    現在のルールを指定したファイルに出力します。\n");

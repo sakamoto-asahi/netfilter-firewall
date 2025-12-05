@@ -20,6 +20,14 @@ typedef enum {
     DELETE_ERR_INTERNAL          // 内部エラーが発生
 } RuleDeleteResult;
 
+typedef enum {
+    CLEAR_SUCCESS,
+    CLEAR_ERR_NO_INPUT_RULES,
+    CLEAR_ERR_NO_OUTPUT_RULES,
+    CLEAR_ERR_NO_RULES,
+    CLEAR_ERR_INTERNAL
+} RuleClearResult;
+
 bool add_rule(FILE *fp, const FirewallRule *rule_to_add);
 RuleUpdateResult update_rule(
     FILE *fp,
@@ -33,6 +41,6 @@ RuleDeleteResult delete_rule(
     int target_index
 );
 bool show_rules(FILE *rule_fp, FILE *config_fp);
-bool clear_rules(FILE *fp);
+RuleClearResult clear_rules(FILE *fp, ChainType target_chain);
 
 #endif
