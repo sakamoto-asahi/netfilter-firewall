@@ -20,6 +20,8 @@ COPY . $APP_DIR
 COPY config/nftables.conf /etc/nftables.conf
 
 # プログラムのコンパイル
+WORKDIR $APP_DIR/test
+RUN make
 WORKDIR $APP_DIR
 RUN make
 
