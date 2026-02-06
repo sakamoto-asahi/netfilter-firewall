@@ -47,22 +47,21 @@ int main(int argc, char *argv[])
         struct sockaddr_in client_addr;
         socklen_t client_len = sizeof(client_addr);
         int recv_size = recvfrom(server_sock, NULL, 0, 0, (struct sockaddr *)&client_addr, &client_len);
+        get_now_time(timestamp, sizeof(timestamp));
         if (recv_size == -1) {
-            fprintf(stderr, "パケットの受信に失敗しました。\n\n");
+            fprintf(stderr, "[%s] パケットの受信に失敗しました。\n\n", timestamp);
             continue;
         }
-
         char client_ip[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
-        get_now_time(timestamp, sizeof(timestamp));
         printf("[%s] %s からパケットを受信しました。\n", timestamp, client_ip);
 
         int send_size = sendto(server_sock, NULL, 0, 0, (struct sockaddr *)&client_addr, client_len);
+        get_now_time(timestamp, sizeof(timestamp));
         if (send_size == -1) {
-            fprintf(stderr, "パケットの送信に失敗しました。\n\n");
+            fprintf(stderr, "[%s] パケットの送信に失敗しました。\n\n", timestamp);
             continue;
         }
-        get_now_time(timestamp, sizeof(timestamp));
         printf("[%s] %s にパケットを返しました。\n\n", timestamp, client_ip);
     }
 

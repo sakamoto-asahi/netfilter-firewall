@@ -38,24 +38,24 @@ int main(int argc, char *argv[])
     server_addr.sin_port = htons(port);
 
     while (true) {
-        char timestamp[64];
         printf("Enterでパケットを送信>");
         getchar();
 
+        char timestamp[64];
         int send_size = sendto(client_sock, NULL, 0, 0, (struct sockaddr *)&server_addr, server_len);
+        get_now_time(timestamp, sizeof(timestamp));
         if (send_size == -1) {
-            fprintf(stderr, "パケットの送信に失敗しました。\n\n");
+            fprintf(stderr, "[%s] パケットの送信に失敗しました。\n\n", timestamp);
             continue;
         }
-        get_now_time(timestamp, sizeof(timestamp));
         printf("[%s] サーバにパケットを送信しました。\n", timestamp);
 
         int recv_size = recvfrom(client_sock, NULL, 0, 0, NULL, NULL);
+        get_now_time(timestamp, sizeof(timestamp));
         if (recv_size == -1) {
-            fprintf(stderr, "パケットの受信に失敗しました。\n\n");
+            fprintf(stderr, "[%s] パケットの受信に失敗しました。\n\n", timestamp);
             continue;
         }
-        get_now_time(timestamp, sizeof(timestamp));
         printf("[%s] サーバから応答がありました。\n\n", timestamp);
     }
 
