@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <errno.h>
+#include <termios.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include "test_utils.h"
@@ -31,6 +34,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    struct timeval timeout;
+    timeout.tv_sec = TIMEOUT_SEC;
+    timeout.tv_usec = 0;
+    if (setsockopt(client_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1) {
+        perror("setsockopt");
+        close(client_sock);
+        return 1;
+    }
+
     struct sockaddr_in server_addr;
     socklen_t server_len = sizeof(server_addr);
     server_addr.sin_family = AF_INET;
@@ -38,8 +50,10 @@ int main(int argc, char *argv[])
     server_addr.sin_port = htons(port);
 
     while (true) {
+        char input_buf[128];
+        tcflush(STDIN_FILENO, TCIFLUSH); // 受信待ちの間に押された不要な文字を破棄
         printf("Enterでパケットを送信>");
-        getchar();
+        fgets(input_buf, sizeof(input_buf), stdin);
 
         char timestamp[64];
         int send_size = sendto(client_sock, NULL, 0, 0, (struct sockaddr *)&server_addr, server_len);
@@ -48,13 +62,18 @@ int main(int argc, char *argv[])
             fprintf(stderr, "[%s] パケットの送信に失敗しました。\n\n", timestamp);
             continue;
         }
-        printf("[%s] サーバにパケットを送信しました。\n", timestamp);
+        printf("[%s] パケットを送信しました。応答を待っています...\n", timestamp);
 
         int recv_size = recvfrom(client_sock, NULL, 0, 0, NULL, NULL);
         get_now_time(timestamp, sizeof(timestamp));
         if (recv_size == -1) {
-            fprintf(stderr, "[%s] パケットの受信に失敗しました。\n\n", timestamp);
-            continue;
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                fprintf(stderr, "[%s] タイムアウト：応答がありませんでした。\n\n", timestamp);
+                continue;
+            } else {
+                fprintf(stderr, "[%s] パケットの受信に失敗しました。\n\n", timestamp);
+                continue;
+            }
         }
         printf("[%s] サーバから応答がありました。\n\n", timestamp);
     }
